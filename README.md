@@ -1,7 +1,7 @@
 # RegFixMatch
 RegFixMatch: Extending classification to regression
 
-
+![algorithm](HC/algorithm.png)
 
 **In this work, we propose a pseudo-label generation method for regression based on the FixMatch model in semi-supervised learning.**
 
