@@ -3,13 +3,14 @@
 File Name: main5.py$
 Description: 
   5-fold cross validation of semi-supervised deep learning for regression based on Pytroch
-  target: Head circumference prediction
+  target: Dose prediction
 Author: Jing
-Date: 07/07/2023
+Date: 19/07/2023
 -----------------------------------------------
 '''
 
 import os
+import sys
 import numpy as np
 import statistics
 import pandas as pd
@@ -31,6 +32,8 @@ from torchmetrics import R2Score
 from torchmetrics import MeanAbsoluteError, MeanAbsolutePercentageError
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import cohen_kappa_score, accuracy_score
+from itertools import zip_longest
+
 
 # hyper parameters
 summary_dir = './logs'
@@ -40,109 +43,112 @@ print('gpu number',torch.cuda.device_count())
 for i in range(torch.cuda.device_count()): print(torch.cuda.get_device_name(i))
 summaryWriter = SummaryWriter(summary_dir)
 baseline = 'vgg11'
-n_label = 50 # 50, 100, 200, 300
+n_label = 900 # 100, 300, 600, 900
 tau = 11/24 # 11/24, 5/12 1/3, 1/4
 bs = 2 # 2, 4, 8, 10, batch size
 alpha2 = 1/12 #  1/12 1/6 1/3 1/2 alpha2 ps loss
 alpha1 = 1-alpha2 # alpha1 cons
-img_width = 224 # ori 800
-img_height = 224 # ori 540
-num_epochs = 200
+img_width = 32
+img_height = 32
+num_epochs = 1
 criterion = nn.HuberLoss()
 mae = MeanAbsoluteError()
 mape = MeanAbsolutePercentageError()
 r2score = R2Score()
 
-best_model_path = '/home/jing/python_code/DeepRT/07semi-super/fix-match-reg/models/'
-root = "/home/jing/python_code/DeepRT/07semi-super/HC/version1"
-img_path = "/home/jing/python_code/DeepRT/07semi-super/HC/version1/HC"
-csv_file = os.path.join(root, "HC.csv")
+best_model_path = '/home/jing/python_code/DeepRT/07semi-super/Dose/models/'
+root = "/home/jing/python_code/DeepRT/07semi-super/Dose/version1"
+img_path = "/home/jing/python_code/DeepRT/07semi-super/Dose/version1/image"
+csv_file = os.path.join(root, "dose.csv")
 
-def data_split_crossval(file, fold= 0, num_label=300, aff_info = True):
-# 5-fold cross validation (1000+300=1300)
-# train: labeled:50,100,200,300; unlabeled:600
-# valid: 200
-# test:  200
+# 5-fold cross validation (2464 images)
+# fold0=964; fold1=fold2=fold3=fold4=fold5=300
+# train: labeled:100,300,600,1864; images: 1864
+# valid: 300
+# test:  300
+
+def data_split_crossval(file, fold= 1, num_label=300, aff_info = True):
 
     dataframe = pd.read_csv(file)
 
-    fold0 = dataframe[dataframe['fold']==0]
+    fold0 = dataframe[dataframe['fold']==0]# images not count in 5-fold cross validation
     fold1 = dataframe[dataframe['fold']==1]
     fold2 = dataframe[dataframe['fold']==2]
     fold3 = dataframe[dataframe['fold']==3]
     fold4 = dataframe[dataframe['fold']==4]
-    fold5 = dataframe[dataframe['fold']==5] # images with no labels
-    img_ngt = fold5['filename'].tolist()
+    fold5 = dataframe[dataframe['fold']==5] 
 
     fold0_image = fold0['filename'].tolist()
-    fold0_label = fold0['head circumference (mm)'].tolist()
     fold1_image = fold1['filename'].tolist()
-    fold1_label = fold1['head circumference (mm)'].tolist()
     fold2_image = fold2['filename'].tolist()
-    fold2_label = fold2['head circumference (mm)'].tolist()
     fold3_image = fold3['filename'].tolist()
-    fold3_label = fold3['head circumference (mm)'].tolist()
     fold4_image = fold4['filename'].tolist()
-    fold4_label = fold4['head circumference (mm)'].tolist()
-
-    if fold == 0:
-        train_image = fold2_image + fold3_image + fold4_image 
-        train_label = fold2_label + fold3_label + fold4_label
-        train_labeled = train_image[:num_label]
-        train_gt = train_label[:num_label]
-        train_unlabeled = train_image[-300:] + img_ngt
-        val_image = fold1_image
-        val_label = fold1_label
-        test_image =  fold0_image
-        test_label = fold0_label
-
+    fold5_image = fold5['filename'].tolist()
+    fold0_label = fold0['dose'].tolist()
+    fold1_label = fold1['dose'].tolist()
+    fold2_label = fold2['dose'].tolist()
+    fold3_label = fold3['dose'].tolist()
+    fold4_label = fold4['dose'].tolist()
+    fold5_label = fold5['dose'].tolist()
+   
     if fold == 1:
-        train_image = fold0_image + fold3_image + fold4_image
-        train_label = fold0_label + fold3_label + fold4_label
+        train_image = fold0_image + fold3_image + fold4_image + fold5_image
+        train_label = fold0_label + fold3_label + fold4_label + fold5_label
         train_labeled = train_image[:num_label]
         train_gt = train_label[:num_label]
-        train_unlabeled = train_image[-300:] + img_ngt
+        train_unlabeled = train_image[num_label:]
         val_image = fold2_image
         val_label = fold2_label
         test_image = fold1_image
         test_label = fold1_label
 
     if fold == 2:
-        train_image = fold1_image + fold0_image + fold4_image
-        train_label = fold1_label + fold0_label + fold4_label
+        train_image = fold0_image + fold1_image + fold4_image + fold5_image
+        train_label = fold0_label + fold1_label + fold4_label + fold5_label
         train_gt = train_label[:num_label]        
         train_labeled = train_image[:num_label]
-        train_unlabeled = train_image[-300:] + img_ngt
+        train_unlabeled = train_image[num_label:]
         val_image = fold3_image
         val_label = fold3_label
         test_image =  fold2_image
         test_label = fold2_label
 
     if fold == 3:
-        train_image = fold1_image + fold2_image + fold0_image
-        train_label = fold1_label + fold2_label + fold0_label
+        train_image = fold0_image + fold1_image + fold2_image + fold5_image
+        train_label = fold0_label + fold1_label + fold2_label + fold5_label
         train_labeled = train_image[:num_label]
         train_gt = train_label[:num_label]
-        train_unlabeled = train_image[-300:] + img_ngt
+        train_unlabeled = train_image[num_label:]
         val_image = fold4_image
         val_label = fold4_label
         test_image =  fold3_image
         test_label = fold3_label
 
     if fold == 4:
-        train_image = fold1_image + fold2_image + fold3_image
-        train_label = fold1_label + fold2_label + fold3_label
+        train_image = fold0_image + fold1_image + fold2_image + fold3_image
+        train_label = fold0_label + fold1_label + fold2_label + fold3_label
         train_labeled = train_image[:num_label]
         train_gt = train_label[:num_label]
-        train_unlabeled = train_image[-300:] + img_ngt
-        val_image = fold0_image
-        val_label = fold0_label
+        train_unlabeled = train_image[num_label:]
+        val_image = fold5_image
+        val_label = fold5_label
         test_image = fold4_image
         test_label = fold4_label
+
+    if fold == 5:
+        train_image = fold0_image + fold2_image + fold3_image + fold4_image
+        train_label = fold0_label + fold2_label + fold3_label + fold4_label
+        train_labeled = train_image[:num_label]
+        train_gt = train_label[:num_label]
+        train_unlabeled = train_image[num_label:] 
+        val_image = fold1_image
+        val_label = fold1_label
+        test_image =  fold5_image
+        test_label = fold5_label    
         
     if aff_info == True:
-        print("Total # images: {},  train_labeled: {}, train_unlabeled: {},  val: {}, test: {}".\
-        format(len(train_labeled+train_unlabeled+ val_image+ test_image), len(train_labeled),len(train_unlabeled), len(val_image), len(test_image)))
+        print("Total training images: {},  labeled: {}, unlabeled: {},  val: {}, test: {}".\
+        format(len(train_labeled+train_unlabeled), len(train_labeled),len(train_unlabeled), len(val_image), len(test_image)))
    
     return train_labeled, train_gt, train_unlabeled, val_image,val_label,test_image,test_label
 
@@ -161,7 +167,7 @@ transform_weak = [hflip, rotat, totensor,normalize]
 transform_weak_list = []
 for _ in range(10):
     transform_w = transforms.Compose(transform_weak)
-    transform_w.transforms[0].size = (32 + random.randint(-2, 2), 32 + random.randint(-2, 2)) # random crop
+    transform_w.transforms[0].size = (4 + random.randint(-2, 2), 4 + random.randint(-2, 2)) # random crop
     transform_w.transforms[1].p = 0.5 + random.uniform(-0.1, 0.1) # probability
     transform_weak_list.append(transform_w)
 
@@ -169,7 +175,7 @@ weak_aug = transforms.Compose([hflip, rotat, totensor, normalize])
 strong_aug = transforms.Compose([hflip, rotat, color_jitter, noise, persp, totensor,normalize])
 transform_norm = transforms.Compose([totensor, normalize]) # for valid and test
 
-class HC_Data(Dataset):
+class Dose_Data(Dataset):
     
     def __init__(self, data_path, image_list = '', label_list = '', mode = 'train', supervised = True):
         self.data_path = data_path
@@ -184,7 +190,7 @@ class HC_Data(Dataset):
         
         image_name = self.image_list[idx]
         image_path = os.path.join(self.data_path, image_name)
-        image = Image.open(image_path).convert("RGB").resize((img_width,img_height))
+        image = Image.open(image_path).resize((img_width,img_height))
         
         if self.mode == 'train':
             if self.supervised == True: 
@@ -213,7 +219,7 @@ all_mae = []
 all_mape = []
 all_ps = []
 # 5-fold cross validation
-for folds in range(0,5):
+for folds in range(1,6):
     print(f'================fold {folds}===============================')
     model = timm.create_model(baseline, pretrained=True, num_classes=1, in_chans=3)
     model.cuda()
@@ -221,40 +227,39 @@ for folds in range(0,5):
     model = torch.compile(model) # in torch2.0
     scheduler = ExponentialLR(optimizer, gamma=0.99)
     train_labeled, train_gt, train_unlabeled, valid_image, valid_gt, test_image, test_gt = data_split_crossval(csv_file, fold= folds, num_label=n_label)
-    labeled_set = HC_Data(data_path=img_path,image_list=train_labeled,label_list=train_gt,mode='train', supervised = True)
-    unlabeled_set = HC_Data(data_path=img_path,image_list=train_unlabeled, mode='train', supervised = False)
-    valid_set = HC_Data(data_path=img_path,image_list=valid_image,label_list=valid_gt,mode='valid')
-    test_set = HC_Data(data_path=img_path,image_list=test_image,label_list=test_gt,mode='test')
-    multiple = int(len(unlabeled_set)/len(labeled_set))
-    print('supervised:', len(labeled_set), 'unsupervised:', len(unlabeled_set),'valid', len(valid_set), 'test:', len(test_set), 'multiple:', multiple)
+    labeled_set = Dose_Data(data_path=img_path,image_list=train_labeled,label_list=train_gt,mode='train', supervised = True)
+    unlabeled_set = Dose_Data(data_path=img_path,image_list=train_unlabeled, mode='train', supervised = False)
+    valid_set = Dose_Data(data_path=img_path,image_list=valid_image,label_list=valid_gt,mode='valid')
+    test_set = Dose_Data(data_path=img_path,image_list=test_image,label_list=test_gt,mode='test')
 
     labeled_loader = DataLoader(dataset=labeled_set, batch_size=bs, shuffle=True, num_workers=6)
-    unlabeled_loader = DataLoader(dataset=unlabeled_set, batch_size=bs*multiple, shuffle=True, num_workers=6)
+    unlabeled_loader = DataLoader(dataset=unlabeled_set, batch_size=bs, shuffle=True, num_workers=6)
     valid_loader = DataLoader(dataset=valid_set, batch_size=bs, shuffle=False, num_workers=6)
     test_loader = DataLoader(dataset=test_set, batch_size=bs, shuffle=False, num_workers=6)
-
     print(f'labeled loader {len(labeled_loader)}, unlabeled_loader {len(unlabeled_loader)}, valid_loader {len(valid_loader)}, test_loader {len(test_loader)} ')
     all_num_ps = 0 # number of pseudo labels in all epochs
-    best_r2=-10
+    best_r2=-100
 
     for epoch in range(num_epochs):
         train_losses = []
         num_ps = 0
         model.train()
 
-        for labeled_data, unlabeled_data in zip(labeled_loader, unlabeled_loader):
-            x1, gt = labeled_data
-            wx2, wx2_list, sx2 = unlabeled_data
-            x1, gt = x1.cuda(), gt.cuda()
-            wx2, sx2 = wx2.cuda(), sx2.cuda()
-            for item in range(len(wx2_list)): wx2_list[item] = wx2_list[item].cuda()
+        for labeled_data, unlabeled_data in zip_longest(labeled_loader, unlabeled_loader, fillvalue=None):
+                
             with torch.enable_grad():
                 
                 model.zero_grad()
-                p1 = model(x1)
-                p1 = torch.squeeze(p1,dim=1)
-                l1 = criterion(gt,p1)
-
+                l1,l2,l3 = 0,0,0
+                if labeled_data is not None:
+                    x1, gt = labeled_data
+                    x1, gt = x1.cuda(), gt.cuda()
+                    p1 = model(x1)
+                    p1 = torch.squeeze(p1,dim=1)
+                    l1 = criterion(gt,p1)
+                wx2, wx2_list, sx2 = unlabeled_data
+                wx2, sx2 = wx2.cuda(), sx2.cuda()
+                for item in range(len(wx2_list)): wx2_list[item] = wx2_list[item].cuda()
                 wp2 = model(wx2)
                 sp2 = model(sx2)
                 wp2 = torch.squeeze(wp2,dim=1)
@@ -265,9 +270,8 @@ for folds in range(0,5):
                 weak_stacked = torch.stack(wx2_list,dim=0) #[10, bs, 3, 224, 224]
                 list_wx2 = torch.reshape(weak_stacked, (len(wx2_list)*weak_stacked.shape[1],3, img_height, img_width))
                 wp2_list = model(list_wx2)
-                wp2_list_array = torch.chunk(wp2_list, bs*multiple, dim=0)
-                sp2_array = torch.chunk(sp2, bs*multiple, dim=0)
-                l3 = 0
+                wp2_list_array = torch.chunk(wp2_list, bs, dim=0)
+                sp2_array = torch.chunk(sp2, bs, dim=0)
                 for each in range(len(sp2_array)):
                     wp2_list_temp = wp2_list_array[each]
                     norm_temp = (wp2_list_temp - wp2_list_temp.min()) / (wp2_list_temp.max() - wp2_list_temp.min())
@@ -278,7 +282,7 @@ for folds in range(0,5):
                         l3 += criterion(pseudo_label, sp2_array[each])
                     else: l3 = 0
 
-                total_loss = l1 + alpha1 * l2 + alpha2 * l3 / bs / multiple # total loss
+                total_loss = l1 + alpha1 * l2 + alpha2 * l3 / bs # total loss
                 total_loss.backward() 
                 optimizer.step()
                 train_losses.append(total_loss.item())

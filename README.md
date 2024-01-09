@@ -1,23 +1,18 @@
-# RegFixMatch
-RegFixMatch: Extending classification to regression
+# RegressionSSL
+**RegressionSSL: A semi-supervised learning method for fast dose calculation in medical physics.**
 
-![algorithm](HC/algorithm.png)
+![algorithm](src/algorithm.png)
 
-**In this work, we propose a pseudo-label generation method for regression based on the FixMatch model in semi-supervised learning.**
-
-👉 The method has been accepted in [conf](www).  
+👉 The paper has been accepted in [place](www).  
 👉 The paper can be viewed on [ResearchGate](rg).  
 
 👉 Code:    
-* [reg-fix-match.ipynb](reg-fix-match.ipynb) (for editing)    
+* [regfixmatch.ipynb](regfixmatch.ipynb) (for editing)    
 * [main5.py](main5.py) (for training)
 
 Highlights:    
-* 
-* 
-* 
-
-
+* We develop an effective radiotherapy dose estimation method based on semi-supervised deep learning.
+* We propose a new pseudo-label generation algorithm in SSL that can better adapt to regression-based tasks.
 
 
 ### Requirements
