@@ -10,7 +10,7 @@
 * [regfixmatch.ipynb](regfixmatch.ipynb) (for editing)    
 * [main5.py](main5.py) (for training)
 
-Highlights:    
+⭐ Highlights:    
 * We develop an effective radiotherapy dose estimation method based on semi-supervised deep learning.
 * We propose a new pseudo-label generation algorithm in SSL that can better adapt to regression-based tasks.
 
