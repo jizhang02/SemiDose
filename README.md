@@ -7,11 +7,11 @@
 👉 The paper can be viewed on [ResearchGate](rg).  
 
 👉 Code:    
-* [requirements.py](requirements.py), necessary Python libs    
-* [data_load.py.py](data_load.py), load dataset
-* [model_load.py](model_load.py), load model
-* [hyper_parameter.py](hyper_parameter.py), hyper-parameters
-* [train_regfixmatch.py](train_regfixmatch.py), model training, validation and test process
+* [requirements.py](./src/requirements.py), necessary Python libs    
+* [data_load.py.py](./src/data_load.py), load dataset
+* [model_load.py](./src/model_load.py), load model
+* [hyper_parameter.py](./src/hyper_parameter.py), hyper-parameters
+* [train_regfixmatch.py](./src/train_regfixmatch.py), model training, validation and test process
 
 ⭐ Highlights:    
 * We develop an effective radiotherapy dose estimation method based on semi-supervised deep learning.
