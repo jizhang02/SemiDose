@@ -2,7 +2,7 @@ from requirements import *
 
 torch.manual_seed(42)   # Set fixed random number seed
 best_model_path = './'
-img_path        = "C:/Users/zhang/Documents/GitHub/Post-doc-latim/DL/wholebody_2D/"
+img_path        = "path/wholebody_2D/"
 csv_file        = img_path + 'dose_organs.csv'
 train_log       = 'train_log.txt'
 

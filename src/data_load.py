@@ -1,6 +1,6 @@
 from requirements import *
-def data_split_crossval(file, organ, fold = 1, num_label = 40, aff_info = True):
 
+def data_split_crossval(file, organ, fold = 1, num_label = 40, aff_info = True):
     ''' 
     5-fold cross validation (total 1000 images)
     organ: bladder liver pancreas kidneys spleen prostate rectum salivary
