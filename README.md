@@ -1,14 +1,17 @@
 # RegressionSSL
 **RegressionSSL: A semi-supervised learning method for fast dose calculation in medical physics.**
 
-![algorithm](src/algorithm.png)
+![workflow](src/workflow.png)
 
 👉 The paper has been accepted in [place](www).  
 👉 The paper can be viewed on [ResearchGate](rg).  
 
 👉 Code:    
-* [regfixmatch.ipynb](regfixmatch.ipynb) (for editing)    
-* [main5.py](main5.py) (for training)
+* [requirements.py](requirements.py), necessary Python libs    
+* [data_load.py.py](data_load.py), load dataset
+* [model_load.py](model_load.py), load model
+* [hyper_parameter.py](hyper_parameter.py), hyper-parameters
+* [train_regfixmatch.py](train_regfixmatch.py), model training, validation and test process
 
 ⭐ Highlights:    
 * We develop an effective radiotherapy dose estimation method based on semi-supervised deep learning.
@@ -23,12 +26,5 @@
 ### Citation
 
 ```
-@inproceedings{regfixmatch,  
-  title={},  
-  author={},  
-  booktitle={},  
-  pages={},  
-  year={},  
-  organization={}  
-}
+
 ```
