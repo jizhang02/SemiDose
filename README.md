@@ -1,10 +1,9 @@
-# RegressionSSL
-**RegressionSSL: A semi-supervised learning method for fast dose calculation in medical physics.**
+# SemiDose
+**SemiDose: Dose prediction in targeted radionuclide therapy using semi-supervised learning from pre-therapy synthetic phantoms.**
 
 ![workflow](src/workflow.png)
 
 👉 The paper has been accepted in [place](www).  
-👉 The paper can be viewed on [ResearchGate](rg).  
 
 👉 Code:    
 * [requirements.py](./src/requirements.py), necessary Python libs    
