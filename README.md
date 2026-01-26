@@ -1,9 +1,9 @@
 # SemiDose
-**SemiDose: Dose prediction in targeted radionuclide therapy using semi-supervised learning from pre-therapy synthetic phantoms.**
+**Semi-supervised learning for dose prediction in targeted radionuclide therapy: a synthetic data study.**
 
 ![workflow](src/workflow.png)
 
-👉 The paper has been accepted in [place](www).  
+👉 The paper has been accepted in [Physics in Medicine & Biology](https://iopscience.iop.org/article/10.1088/1361-6560/ae36df/meta).  
 
 👉 Code:    
 * [requirements.py](./src/requirements.py), necessary Python libs    
@@ -25,5 +25,17 @@
 ### Citation
 
 ```
-
+@article{Zhang_2026,
+doi = {10.1088/1361-6560/ae36df},
+url = {https://doi.org/10.1088/1361-6560/ae36df},
+year = {2026},
+month = {jan},
+publisher = {IOP Publishing},
+volume = {71},
+number = {2},
+pages = {025005},
+author = {Zhang, Jing and Bousse, Alexandre and Pham, Chi-Hieu and Shi, Kuangyu and Bert, Julien},
+title = {Semi-supervised learning for dose prediction in targeted radionuclide therapy: a synthetic data study},
+journal = {Physics in Medicine & Biology},
+}
 ```
