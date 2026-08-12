@@ -1,0 +1,5 @@
+# Minimal environment for the synthetic forward-pass example and smoke test.
+numpy==1.26.4
+torch==2.1.2
+torchvision==0.16.2
+timm==0.9.12

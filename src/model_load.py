@@ -1,11 +1,19 @@
-from requirements import *
-from hyper_parameter import *
+"""Neural-network definitions used by the SemiDose experiments.
 
-img_shape = (3, img_height, img_width)
+This module deliberately keeps model construction independent from the dataset
+and training configuration so it can also be imported for inference and tests.
+"""
+
+import numpy as np
+import timm
+import torch
+import torch.nn as nn
+
+img_shape = (3, 256, 256)
 
 class Generator_ft(nn.Module): # for feature matching
     def __init__(self):
-        super(Generator, self).__init__()
+        super().__init__()
 
         def block(in_feat, out_feat, normalize=True):
             layers = [nn.Linear(in_feat, out_feat)]
@@ -32,7 +40,7 @@ class Generator_ft(nn.Module): # for feature matching
 
 class Discriminator_ft(nn.Module): # for feature matching
     def __init__(self, model_name='resnet18', num_classes=1, pretrained=True):
-        super(Discriminator, self).__init__()
+        super().__init__()
         self.pretrained_model = timm.create_model(model_name, pretrained=pretrained, num_classes=0)  # num_classes=0means remove the last classifer layer
         self.features_dim = self.pretrained_model.num_features
         

@@ -1,0 +1,8 @@
+-r requirements-smoke.txt
+
+# Additional dependencies used by data loading, training, and evaluation.
+pandas==2.1.4
+Pillow==10.2.0
+SimpleITK==2.3.1
+tensorboard==2.15.1
+torchmetrics==1.3.0.post0
